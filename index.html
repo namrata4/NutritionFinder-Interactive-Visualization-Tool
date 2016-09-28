@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="utf-8">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.css">
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+
+
+<style>
+body {
+	font: 11px sans-serif;
+}
+
+.xaxis line, .xaxis text {
+	font-weight: bold;
+	font-size: small;
+}
+
+.xaxis path {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.yaxis line, .yaxis text {
+	font-weight: bold;
+	font-size: small;
+}
+
+.yaxis path {
+	fill: none;
+	stroke: #000;
+	shape-rendering: crispEdges;
+}
+
+.container-fluid {
+	height: 100%;
+}
+
+.selected {
+	fill: #afa2dc;
+	stroke: #2f225d;
+}
+
+.clear-button {
+	fill: blue;
+	font-weight: bold;
+	font-size: small;
+	cursor: pointer;
+}
+
+.brush .extent {
+	stroke: #fff;
+	fill-opacity: .125;
+	shape-rendering: crispEdges;
+}
+
+h1 {
+	font-family: serif;
+}
+
+.dropdown {
+	height: 20px;
+	background-color: #e6f2ff;
+	font-size: small;
+	font-family: cursive;
+}
+
+#redraw {
+	position: relative;
+	margin-left: 30px;
+	margin-top: -5px;
+}
+
+#labelDiv {
+	height: 250px;
+	width: 600px;
+	margin-left: 48px;
+	margin-top: 10px;
+	font-size: small;
+}
+</style>
+</head>
+<body>
+	<header>
+		<div class="header-content" style="background-color: #99ccff">
+			<div class="header-content-inner">
+				<h1>NutritionFinder</h1>
+				<h4 class="text-muted">know what you are eating</h4>
+				<hr>
+			</div>
+		</div>
+	</header>
+
+	<div class="container-fluid">
+		<div class="col-md-8">
+			<div class="row">
+				<div id="graph" style="margin-left: 50px; background-color: #ffe6ff"></div>
+			</div>
+			<div class="row">
+				<div id="labelDiv" class="panel panel-danger"
+					style="visibility: hidden"></div>
+			</div>
+		</div>
+
+		<div class="col-md-3" style="position: relative; margin-left: 50px">
+			<div class="row">
+				<div class="panel panel-info">
+					<div class="panel-heading">
+						<h4>Modify the measures</h4>
+					</div>
+					<div class="panel-body">
+						<label for="xattr">X Axis</label> <select class="dropdown"
+							id="xattr">
+							<option value="water">Water</option>
+							<option value="energy">Energy</option>
+							<option value="protein">Protein</option>
+							<option value="carb">Carbohydrates</option>
+							<option value="fiber">Fiber</option>
+							<option value="sugar">Sugar</option>
+							<option value="sodium">Sodium</option>
+							<option value="satfat">Saturated Fats</option>
+							<option value="chol" selected>Cholesterol</option>
+						</select> <label for="yattr">Y Axis</label> <select id="yattr"
+							class="dropdown">
+							<option value="water">Water</option>
+							<option value="energy" selected>Energy</option>
+							<option value="protein">Protein</option>
+							<option value="carb">Carbohydrates</option>
+							<option value="fiber">Fiber</option>
+							<option value="sugar">Sugar</option>
+							<option value="sodium">Sodium</option>
+							<option value="satfat">Saturated Fats</option>
+							<option value="chol">Cholesterol</option>
+						</select>
+
+						<button id="redraw" type="button" class="btn btn-xs btn-info"
+							onclick="reDraw()">View</button>
+
+					</div>
+				</div>
+				<div class="row">
+					<div class="panel panel-info">
+						<div class="panel-heading">
+							<h4>Filter by Food Group</h4>
+						</div>
+						<div class="panel-body">
+							<ul style="font-size: small;">
+								<li><i class="fa fa-square-o"
+									style="color: #ff0000; background-color: #ff0000"></i>&nbsp
+									&nbsp <a href="javascript:filterFoodGroup('Baked Products')">Baked
+										Products</a></li>
+								<li><i class="fa fa-square-o"
+									style="color: #3333ff; background-color: #3333ff"></i>&nbsp
+									&nbsp<a href="javascript:filterFoodGroup('Beverages')">
+										Beverages</a></li>
+								<li><i class="fa fa-square-o"
+									style="color: #ffff00; background-color: #ffff00"></i>&nbsp
+									&nbsp <a href="javascript:filterFoodGroup('Fast Foods')">Fast
+										Foods</a></li>
+								<li><i class="fa fa-square-o"
+									style="color: #00cc44; background-color: #00cc44"></i>&nbsp
+									&nbsp <a href="javascript:filterFoodGroup('Restaurant Foods')">
+										Restaurant Foods</a></li>
+								<li><i class="fa fa-square-o"
+									style="color: #cc4400; background-color: #cc4400"></i>&nbsp
+									&nbsp <a href="javascript:filterFoodGroup('Snacks')">Snacks</a></li>
+								<li><i class="fa fa-square-o"
+									style="color: #ffb3ff; background-color: #ffb3ff"></i>&nbsp
+									&nbsp <a href="javascript:filterFoodGroup('Sweets')">
+										Sweets</a></li>
+							</ul>
+							<button id="defilter" type="button" class="btn btn-xs btn-info"
+								onclick="defilter()" disabled>Remove Filter</button>
+
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="panel panel-danger"
+						style="font-size: 15px; font-family: sans-serif">
+						<div class="panel-heading">
+							<h4>
+								<b>Welcome to the NutritionFinder!</b>
+							</h4>
+							Your guide to composition of different foods.
+						</div>
+						<div class="panel-body">
+							The visualization on your left displays the comparison of
+							cholesterol and energy levels for six different food groups.<br>
+							<br>
+							<ul>
+								<li><b>Click</b> on any <b>data point</b> anytime on the
+									graph to view the <b>details</b> of the food item.</li>
+								<li><b>Change</b> the <b>measures</b> on the axes using the
+									<b>dropdowns</b> present at right to view comparisons between
+									different food components.</li>
+								<li>At anytime to <b>focus or zoom</b> on a particular
+									range just <b>drag the pointer</b> over the graph to select the
+									desired range. The graph will be focused and zoomed to that
+									range. Click on <b>"Clear Brush"</b> to remove the focus.
+								</li>
+								<li><b>Filter</b> the data to see only a specific food
+									group by <b>clicking</b> on the desired food group in the <b>list</b>
+									present at right.</li>
+							</ul>
+							Use combination of filter and focus to view the different food
+							compositions within the de.sired range of measures.<br>
+							<div style="font-size:11px">The data is taken from US Department of Agriculture, Agricultural Research Service, Nutrient Data Laboratory
+							 <a href="http://www.ars.usda.gov/ba/bhnrc/ndl">link to data</a></div>
+
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+
+	</div>
+
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+	<script src="d3scatter_new.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</body>
+</html>
+
